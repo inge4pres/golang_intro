@@ -1,0 +1,67 @@
+Go Introduction
+14 Mar 2018
+Platform teams
+Tags: go golang
+
+* The language
+
+It is...
+
+- developed @ Google since 2007
+- stable version 1 since March 2012
+- compiled
+- garbage collected (no memory management)
+- statically typed
+- implementing [[https://en.wikipedia.org/wiki/Communicating_sequential_processes][CSP]] (communicating sequential processes) principle
+
+It isn't... 
+
+- OOP
+- functional
+- threaded (unless via special packages like `runtime` or `unsafe`)
+
+* Installing
+
+    brew install go
+
+Or download from website [[https://golang.org/dl/]]
+
+Once installed, you'll find in your `$HOME` the following directory tree
+
+    go/
+        src/ # source code (personal and dependencies)
+        pkg/ # intermediate compilation artifacts
+        bin/ # compiled binaries 
+
+: layout directory is at the core of tooling workflow
+
+Running
+
+    go env
+
+shows the configuration, where most important variables are `GOARCH`,`GOOS`, `GOPATH` and `GOROOT`.
+
+* Tooling
+
+The `go` binary is bundled with a set of tools to:
+
+- run tests and syntax check
+- lint and format
+- debug and profile
+- run programs locally
+- (cross-)compile to binary
+
+    go help
+
+shows all the available subcommands 
+
+    go tool dist list
+
+shows all the available platform/architecture compilation targets.
+
+* Hello Go
+
+.play code/hello.go
+
+: note the import section and the package main
+
