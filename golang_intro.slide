@@ -80,11 +80,31 @@ All the tools to do code-completion, test debugging, code search and others are 
 .play cmd/hello_go/main.go
 
 : note the import section and the package main
-With go installed you can now `get` this repository
+With go installed you can now `get` the presenation repository 
 
     go get git.bravofly.com/fgualazzi/golang_intro.git
 
+and it will be placed into 
 
+    $HOME/go/src/git.bravofly.com/fgualazzi/golang_intro.git
+
+* Running Hello Go locally
+
+- via `go` `run` ...
+
+    go run ./cmd/hello_go/main.go
+
+- build in local dir and execute
+
+    go build -o hello ./cmd/hello_go && ./hello
+
+- build and install to `$HOME/go/bin`
+
+    go install ./cmd/hello_go && hello_go
+
+- cross-compile and run in docker
+
+    make hello-go-docker 
 
 * Types and variables
 
