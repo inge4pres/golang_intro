@@ -5,20 +5,21 @@ Tags: go golang
 
 * The language
 
-It is...
+Is...
 
 - developed @ Google since 2007
-- stable version 1 since March 2012
+- stable version 1 since March 2012, one minor release ~ every 6 months
+- community-driven (accepting PR on [[https://github.com/golang/go][Github]])
 - compiled
-- garbage collected (no memory management)
+- garbage collected: no explicit memory management, unless via `unsafe` pkg
 - statically typed
 - implementing [[https://en.wikipedia.org/wiki/Communicating_sequential_processes][CSP]] (communicating sequential processes) principle
 
-It isn't... 
+Is not...
 
-- OOP
-- functional
-- threaded (unless via special packages like `runtime` or `unsafe`)
+- purely OOP: some polymorphism via interfaces, no inheritance
+- purely functional: no functors or monads built-ins, but you can roll your own
+- threaded, unless via `runtime` or `unsafe` pkgs
 
 * Installing
 
@@ -28,10 +29,10 @@ Or download from website [[https://golang.org/dl/]]
 
 Once installed, you'll find in your `$HOME` the following directory tree
 
-    go/
-        src/ # source code (personal and dependencies)
-        pkg/ # intermediate compilation artifacts
-        bin/ # compiled binaries 
+    go/         # $HOME/go/ is the default workspace since go 1.7
+        src/    # source code (personal and dependencies)
+        pkg/    # intermediate compilation artifacts
+        bin/    # compiled binaries 
 
 : layout directory is at the core of tooling workflow
 
@@ -39,7 +40,7 @@ Running
 
     go env
 
-shows the configuration, where most important variables are `GOARCH`,`GOOS`, `GOPATH` and `GOROOT`.
+shows the configuration, where most important variables are `GOARCH`, `GOOS`, `GOPATH` and `GOROOT`.
 
 * Tooling
 
@@ -59,9 +60,32 @@ shows all the available subcommands
 
 shows all the available platform/architecture compilation targets.
 
+* Development
+
+Most popular IDEs
+
+- IntelliJ IDEA + Go Plugin / Goland EAP
+- VS Code
+- vim + vim-go
+- atom + go-plus
+- LiteIDE
+- Eclipse (?)
+
+Anywhere you have a shell with the `go` binary you're set.
+
+All the tools to do code-completion, test debugging, code search and others are available as go packages, so you can `go` `install` them!
+
 * Hello Go
 
-.play code/hello.go
+.play cmd/hello_go/main.go
 
 : note the import section and the package main
+With go installed you can now `get` this repository
 
+    go get git.bravofly.com/fgualazzi/golang_intro.git
+
+
+
+* Types and variables
+
+.play cmd/types_variables/main.go
