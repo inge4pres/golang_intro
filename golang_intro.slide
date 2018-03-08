@@ -80,7 +80,7 @@ All the tools to do code-completion, test debugging, code search and others are 
 .play cmd/hello_go/main.go
 
 : note the import section and the package main
-With go installed you can now `get` the presenation repository 
+With go installed you can now `go` `get` the presentation repository 
 
     go get git.bravofly.com/fgualazzi/golang_intro.git
 
@@ -90,11 +90,11 @@ and it will be placed into
 
 * Running Hello Go locally
 
-- via `go` `run` ...
+- via `go` `run`
 
     go run ./cmd/hello_go/main.go
 
-- build in local dir and execute
+- build locally and execute
 
     go build -o hello ./cmd/hello_go && ./hello
 
@@ -102,10 +102,287 @@ and it will be placed into
 
     go install ./cmd/hello_go && hello_go
 
-- cross-compile and run in docker
+- cross-compile and run in docker container
 
     make hello-go-docker 
 
+* Workspace and project structure
+
+All the sources live in `$HOME/go/src` in the form of _qualified_ _packages_.
+When you import a package running
+
+    go get repository.com/group/project 
+    
+it will be downloaded to 
+
+    $HOME/go/src/repository.com/group/project 
+
+When you produce a new package you should already place it in the proper path so it can be imported by others
+
+    mkdir $HOME/go/src/git.bravofly.com/group/project
+
+A recommended (but not mandatory) project structure is with `cmd`, `pkg`, `test` folders at the root of your project.
+
+    $HOME/go/src/repository.com/group/project
+        /cmd    # main.go files, each one in a separate fodler  
+        /pkg    # packages
+        /test   # integration tests
+
+* Scope
+
+There are only 2 possible scopes:
+
+- exported: visible outside the package in which is declared
+- unexported: not visible outside the package in which si declared
+
+The rule is:
+
+"Any type, field, variable or function is exported when the first letter of its name is upper-case"
+
+Example: [[https://github.com/golang/go/blob/master/src/os/file.go#L104][`Read()` method in `os.File`]]
+You can do:
+
+    buffer := make([]byte, 0)
+    read, err := file.Read(buffer)
+    ...
+
+but you can't call directly `file.checkValid()`, `file.read()` or `file.wrapErr()`.
+
 * Types and variables
 
+Once created variables are assigned a type in any of
+
+    bool
+    string
+    int  int8  int16  int32  int64 uint uint8 uint16 uint32 uint64 uintptr
+    byte // alias for uint8
+    rune // alias for int32, represents a Unicode code point
+    float32 float64
+    complex64 complex128
+
+When creating a variable with no value it will be assigned the type's _zero-value_
+
+    var myInt int64         // = 0
+    var myString string     // = ""
+
+* Types and variables: casting
+
+Variables cannot change type once assigned one but can be casted to other types.
+The compiler or `go` `vet` command will warn you if there are incompatible types conversions.
+
+.play ./cmd/type_casting/main.go
+
+* Types and variables: assignment and initialization order
+
 .play cmd/types_variables/main.go
+
+* Types and variables: custom types
+
+You can declare custom types using the following syntax:
+
+    type MyType struct { // exported name
+        field1 T1        // un-exported fields
+        field2 T2
+        field3,
+        field4 T3
+    }
+
+You can also alias types using the syntax
+
+    type NewType OriginalType 
+
+an example is used in `net/http` for type `http.Header`
+
+    type http.Header map[string][]string
+    
+* Pointers
+
+Go has pointers but no pointers arithmetics (unless via `unsafe` pkg).
+The operators `*` and `&` are used to de-reference and assign pointers from/to variables.
+
+.play ./cmd/pointers/main.go
+
+* Pointers: initialization
+
+Given a structure
+
+    type person struct {
+        name,
+        surname string
+        age int
+    }
+
+- `new()` creates a pointer to an emtpy type:
+
+    me := new(person)       // all fields of person are at zero-value
+    me.name = "Francesco"
+    me.age = 32
+
+- `&` creates a pointer filling in the fields (more adopted)
+
+    me := &person{
+        name: "Francesco",
+        age: 32,  // not mandatory to fill all the fields, the empty ones will be zero-value'd
+    }
+
+`me` is now of type pointer to person, or `&person{"Francesco",` `32}`
+
+* Functions and methods
+
+Both are identified by the starting keyword `func`, can have 0 or multiple arguments, can have 0 or multiple returns
+
+Function signature
+
+    func myFunction(arg1 T, arg2 T2) (RetType1, RetType2) {}
+    func myFunction(arg1, arg2 T) {}
+
+Method signature
+
+    func (receiver myType) myMethod(arg1 T1, arg2 T2) error {}
+
+Actually no big difference between the two: methods have a _receiver_ and is common to use a pointer to a type because most of methods need to modify the receiver itself.
+Convention is to return multiple values leaving `error` as last one (example from std library pkg [[https://github.com/golang/go/blob/master/src/net/http/client.go#L369][net/http/client.go]])
+
+    func Get(url string) (resp *Response, err error) {
+        return DefaultClient.Get(url)
+    }
+
+* Functions and methods: pass-by-value, pass-by-reference
+
+When a function is declared it can accept raw ypes or pointers to type, either as arguments or receiver.
+All arguments are _copied_ to the function when it executes so:
+
+- a copy of a variable will be modified only in the function
+- a copy of a pointer will keep the reference to the original variable
+
+When to use pointers:
+
+- performance needs (large data structure)
+- mutability
+- implementing interfaces
+
+* Functions and methods: pass-by-value, pass-by-reference (code)
+
+.play ./cmd/functions/main.go
+
+* Function and methods
+
+Functions are types!
+
+In [[https://github.com/golang/go/blob/master/src/net/http/server.go#L2369][http.HandleFunc]] the second argument is of type `func(ResponseWriter,` `*Request)`
+
+.play ./cmd/functions_types/main.go
+
+* Collections
+
+Collections are types!
+
+- array: fixed size list
+
+    oneToTen := [10]int{1,2,3,4,5,6,7,8,9,10}
+
+- slice: variable size list (pointers to array)
+
+    numbers := []int{1,2,3,4,5,6,7,8,9,10}
+    greatEqualFive = numbers[4:]
+    lowerThanSeven = numbers[:5]
+    allNumbers = numbers[:] // == numbers[0:9]
+
+- map: a key-value structure with a type for keys and one for values
+
+    htmlColors := make(map[string]string, 0)
+    htmlColors["DeepBlue"] = "1A165D"       // store
+    htmlColors["MagentaLMN"] = "F60FD7"    
+    flamingo := htmlColors["MagentaLMN"]    // fetch
+
+* Collections: operators
+
+- `append([]T,` `T...)` adds up to the first argument slice all the items from second argument onward (all must have same type), returns a bigger slice
+
+    numbers := make([]int, 0)
+    numbers = append(numbers, []int{1,2,3,4,5,6,7,8,9,10}...)
+
+- `len()` returns an `int` with the size of elements contained
+
+    oneToTen := [10]int{1,2,3,4,5,6,7,8,9,10}
+    fmt.Println(len(oneToTen)) // prints 10
+
+- `cap()` returns an `int` with the size of the slots allocated
+
+    numbers := make(int, 0)
+    numbers = append(numbers, []int{1,2,3,4,5,6,7,8,9,10}...)
+
+* Interfaces
+
+Interfaces define a set of methods that compose a behaviour. Implementing an interface is implicit: just implement all the interface methods with the right signature.
+
+"_The_ _bigger_ _the_ _interface_ _the_ _weaker_ _the_ _abstraction_" - Rob Pike
+
+    // define interfaces
+    type StockBuyer interface {
+        Buy(float64) error
+    }
+    type StockSeller interface {
+        Sell(float64) (float64, error)
+    }
+    type StockExchanger interface {
+        StockBuyer
+        StockSeller
+    }
+    // create a type
+    type FTSEMib struct {}
+    // implement all 3 interfaces 
+    func (f FTSEMib) Buy(price float64) error { ... }
+    func (f FTSEMib) Sell(price float64) (float64, error) { ... }
+
+
+* Tests
+
+The standard library pkg `testing` offers a set of functionalities to write tests. 
+Tests will be written into `*_test.go` files and all he test function namess will start will have the signature 
+
+    func TestSomething(t *testing.T){}
+
+Running `go` `test` `-v` `./...` will run all the test functions in current folder and all sub-folders and will print a report to stdout. Exit code is relevant.
+
+`go` `test` `--help` will show all the available flags but notably:
+
+    -cover          // enable coverage profile
+    -coverprofile   // output coverage to file
+    -failfast       // stop after first failure
+    -race           // detect race-conditions
+    -timeout        // stop running a test after X seconds
+
+* Tests: coverage
+
+
+
+* Tests: benchmarks
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+

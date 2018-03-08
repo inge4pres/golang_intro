@@ -4,7 +4,7 @@ hello-go-local-build:
 hello-go-docker:
 	GOOS=linux GOARCH=amd64 go build -o app ./cmd/hello_go 
 	docker build -t hello-go .
-	docker run --rm hello-go
+	docker run -it --rm hello-go
 	file app
 	rm -rf app
 	

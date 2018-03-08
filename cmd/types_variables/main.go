@@ -10,11 +10,9 @@ func init() {
 }
 func main() {
 	third := 3
-	numbers := make([]int, 0)
-	numbers = []int{first, second, third}
+	numbers := []int{first, second, third}
 	fmt.Printf("sum = %d", sum(numbers...))
 }
-
 func sum(numbers ...int) int {
 	var result int
 	for _, n := range numbers {
