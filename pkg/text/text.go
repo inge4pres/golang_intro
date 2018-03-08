@@ -16,3 +16,7 @@ func emptyLine() string {
 func MessageInABox(input string) string {
 	return fmt.Sprintf("%s\n%s\n%s", emptyLine(), MajorMinorFormat(input), emptyLine())
 }
+
+func textSeparator() string {
+	return "***"
+}
