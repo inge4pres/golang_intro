@@ -18,3 +18,9 @@ func TestMessageInABox(t *testing.T) {
 		t.Error("expected at least one empty line")
 	}
 }
+
+func BenchmarkEmptyline(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = emptyLine()
+	}
+}

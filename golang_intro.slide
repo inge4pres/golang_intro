@@ -335,13 +335,16 @@ Interfaces define a set of methods that compose a behaviour. Implementing an int
     func (f FTSEMib) Buy(price float64) error { ... }
     func (f FTSEMib) Sell(price float64) (float64, error) { ... }
 
-
 * Tests
 
 The standard library pkg `testing` offers a set of functionalities to write tests. 
 Tests will be written into `*_test.go` files and all he test function namess will start will have the signature 
 
-    func TestSomething(t *testing.T){}
+    func TestSomething(t *testing.T) {
+        ...
+        t.Fail()
+        t.Error()
+    }
 
 Running `go` `test` `-v` `./...` will run all the test functions in current folder and all sub-folders and will print a report to stdout. Exit code is relevant.
 
@@ -350,21 +353,47 @@ Running `go` `test` `-v` `./...` will run all the test functions in current fold
     -cover          // enable coverage profile
     -coverprofile   // output coverage to file
     -failfast       // stop after first failure
+    -run            // limit the tests to be executed to a regexp match on test name
     -race           // detect race-conditions
-    -timeout        // stop running a test after X seconds
+    -timeout        // run a test for max seconds
 
 * Tests: coverage
 
+You can visualize coverage with a nice HTML report
 
+    go test -v -cover -coverprofile=cov.out ./pkg/...
+    go tool cover -func=cov.out
+    go tool cover -html=cov.out
+
+For use in CI: the output of tests can be a JSON to be parsed to produce coverage reports
+
+    go test -v -cover -json ./pkg/...
+
+and there are parsers out there that will produce xUnit report out of it
+
+* Tests: frameworks
+
+Wrappers around `testing` that makes it easy to write tests with complex conditions reducing the boilerplate code
+
+- [[https://github.com/stretchr/testify][stretchr/testify]] easy `assert` with matchers
+- [[https://onsi.github.io/ginkgo/][ginkgo]] + [[http://onsi.github.io/gomega/][gomega]] extensive BDD framework
 
 * Tests: benchmarks
 
+`testing` lets you write benchmark tests to compare performance of different implementations.
+You can write benchmark tests with the signature
 
+    func BenchmarkSomething(b *testing.B) {
+        for n := 0; n < b.N; n++ {
+                ...
+        }
+    }
 
+and see the results of the benchmark running
 
+    go test -benchmem -bench=. ./pkg/...
 
-
-
+* 
 
 
 
