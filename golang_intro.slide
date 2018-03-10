@@ -108,8 +108,7 @@ and it will be placed into
 
 * Workspace and project structure
 
-All the sources live in `$HOME/go/src` in the form of _qualified_ _packages_.
-When you import a package running
+All the sources live in `$HOME/go/src` in the form of _qualified_ _packages_. To fetch a pkg
 
     go get repository.com/group/project 
     
@@ -127,6 +126,23 @@ A recommended (but not mandatory) project structure is with `cmd`, `pkg`, `test`
         /cmd    # main.go files, each one in a separate fodler  
         /pkg    # packages
         /test   # integration tests
+
+* Working with packages and libraries
+
+After a `go` `get` you can import a library using `import` as first statement after `package` declaration.
+
+    import "testing"
+
+    import (
+        "testing"
+        
+        "git.bravofly.com/fgualazzi/golang_intro.git/pkg/text"
+    )
+
+Standard lib packages are imported using their name, additional packages using their path on the filesystem relative to `$HOME/go/src`.
+You can then recall packages functionalities using the declared name
+
+.play ./cmd/message_box/main.go
 
 * Scope
 
@@ -147,6 +163,64 @@ You can do:
     ...
 
 but you can't call directly `file.checkValid()`, `file.read()` or `file.wrapErr()`.
+
+* Syntax
+
+- `make()` and `new()`: initialization
+
+    arrayOfBytes := make([]byte, 0)
+    pointerToStruct := new(StructType)
+
+- `if`, `else`, `switch`: conditionals (if-else is discouraged)
+
+    if condition() {}
+    if a, ok := values(); ok {}
+    switch user := users(); user {
+        case "fgualazzi":
+            ...
+        default:
+            ...
+    }
+
+- `for`, `range`: looping
+
+    for a := 0; a < MAX; a++ {}
+    for key, val := range array {}
+
+* Syntax: concurrency
+
+- `go` start a goroutine
+
+    go backgroundTask()
+    proceed()
+
+- `chan` identifies a channel, `<-` sends or read
+
+    messages := make(chan(string), 0)
+    messages <- "Hi there!"
+    firstResponse := <- messages
+    for r := range responses {}
+    
+- `close` stops the channel
+
+    close(messages)
+    mex := <- messages // == nil
+
+* Syntax: execution
+
+- `panic`, `recover`: execution interruption and recovery
+
+    if err := checkSomething(); err != nil {
+        panic(err)
+    }
+
+- `defer` delays execution after parent has exited
+
+    func readFile(){
+        file := os.Open("some/path")
+        defer file.Close()
+        ...
+    }
 
 * Types and variables
 
@@ -393,7 +467,57 @@ and see the results of the benchmark running
 
     go test -benchmem -bench=. ./pkg/...
 
-* 
+* Concurrency
+
+Go does not have threads, it uses goroutines
+
+    A goroutine is a lightweight thread managed by the Go runtime
+
+By far the most complex functinality of the language: its not very easy to use but can yield to amazing resource optimization.
+For example when network is a constraint you can create rate limiters or request pools, or you can control disk access for I/O intensive applications.
+
+Using gorotuines implies a change of mindset because you're not intended to parallelize the same task but rather split the task in sub-tasks and make them run in sync.
+
+Parallel    => run the same thing multiple times
+Concurrent  => run multiple things at the same time 
+
+* So much to discover...
+
+Go has a lot more to offer from the standard library
+
+- vendoring and dependency management 
+- exposing application metrics with `expvar` package
+- enriching http with `context`
+- use of closures
+- mutexes and channels (for concurrent applications)
+- databases via `sql` package
+- conditional build targets
+- improting and running C code via cgo
+- code generation
+
+Just google `golang ...` for a stackoverflow page or blog post.
+
+* Real-world application
+
+Go has been proven to be very efficient in networking and cpu intensive processing using a low memory footprint.
+Our real-world application will be an HTTP rewrite engine, configurable via JSON.
+
+Requirements:
+
+- it should be possible to pass the JSON configuration file as a command-line argument
+- 
+
+You can get the repository with
+
+    go get git.bravofly.com/fgualazzi/rewrite-engine.git
+
+Exercise consists in:
+
+- writing `main`
+- improve performance: create benchmark tests (hint maps are generally faster than slices)
+- add a second behaviour with a different type of rule to be applied (e.g. URI to URI instead of URI to URL)
+
+
 
 
 
