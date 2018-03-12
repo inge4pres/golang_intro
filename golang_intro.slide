@@ -589,21 +589,19 @@ Go has a lot more to offer from the standard library
 
 Just google `golang ...` for a stackoverflow page or blog post.
 
+* Questions?
+
 * Real-world application
 
 Go has been proven to be very efficient in networking and cpu intensive processing using a low memory footprint.
 Our real-world application will be an HTTP rewrite engine, configurable via JSON.
 
-Requirements:
-
 - it should be possible to pass the JSON configuration file as a command-line argument
-- 
-
-You can get the repository with
+- it should redirect to a URL for a given URI, serve 404 if no URI matches configuration
 
     go get git.bravofly.com/fgualazzi/rewrite-engine.git
 
-Exercise consists in:
+Exercise:
 
 - writing `main`
 - improve performance: create benchmark tests (hint maps are generally faster than slices)
