@@ -69,7 +69,7 @@ Most popular IDEs
 - vim + vim-go
 - atom + go-plus
 - LiteIDE
-- Eclipse (?)
+- Eclipse
 
 Anywhere you have a shell with the `go` binary you're set.
 
@@ -129,9 +129,7 @@ A recommended (but not mandatory) project structure is with `cmd`, `pkg`, `test`
 
 * Working with packages and libraries
 
-After a `go` `get` you can import a library using `import` as first statement after `package` declaration.
-
-    import "testing"
+After a `go` `get` you can import a library using `import` as first statement after `package` declaration
 
     import (
         "testing"
@@ -140,9 +138,30 @@ After a `go` `get` you can import a library using `import` as first statement af
     )
 
 Standard lib packages are imported using their name, additional packages using their path on the filesystem relative to `$HOME/go/src`.
-You can then recall packages functionalities using the declared name
+You can then recall packages objects using the exported name and the package name
 
 .play ./cmd/message_box/main.go
+
+* Working with packages and libraries: additional packages 
+
+You can choose how to import external packages
+
+- assign a custom name to an imported package
+
+    import useless "git.bravofly.com/fgualazzi/golang_intro.git/pkg/text"
+    ...
+    useless.MessageInABox("")
+
+- importing as local (discouraged)
+
+    import . "git.bravofly.com/fgualazzi/golang_intro.git/pkg/text"
+    ...
+    MessageInABox("")
+
+- importing only _side-effects_
+
+    import "database/sql"
+    import _ "github.com/go-sql-driver/mysql"
 
 * Scope
 
@@ -153,7 +172,7 @@ There are only 2 possible scopes:
 
 The rule is:
 
-"Any type, field, variable or function is exported when the first letter of its name is upper-case"
+_"Any_ _type,_ _field,_ _variable_ _or_ _function_ _is_ _exported_ _when_ _the_ _first_ _letter_ _of_ _its_ _name_ _is_ _upper-case"_
 
 Example: [[https://github.com/golang/go/blob/master/src/os/file.go#L104][`Read()` method in `os.File`]]
 You can do:
@@ -164,17 +183,37 @@ You can do:
 
 but you can't call directly `file.checkValid()`, `file.read()` or `file.wrapErr()`.
 
-* Syntax
+* Syntax: assignment
+
+- `var` and `:=` create variables (and infer type)
+
+    var name string // empty string ""
+    var myName := "gopher"
 
 - `make()` and `new()`: initialization
 
     arrayOfBytes := make([]byte, 0)
     pointerToStruct := new(StructType)
 
+- `_` discards the value
+
+    // we really don't care of the result, just check if it's convertible to int
+    _, err := strconv.Atoi("A42")
+
+also used to execute code without getting the return value
+
+    var _ := func() {
+        log.Prinln("executing")
+    }
+
+* Syntax: conditions and loops
+
 - `if`, `else`, `switch`: conditionals (if-else is discouraged)
 
     if condition() {}
+
     if a, ok := values(); ok {}
+
     switch user := users(); user {
         case "fgualazzi":
             ...
@@ -185,16 +224,21 @@ but you can't call directly `file.checkValid()`, `file.read()` or `file.wrapErr(
 - `for`, `range`: looping
 
     for a := 0; a < MAX; a++ {}
-    for key, val := range array {}
+
+    for index, item := range someSlice {}
+
+    for key, val := range someMap {}
+
+    for {} // == while(true) in bash, loops forever
 
 * Syntax: concurrency
 
-- `go` start a goroutine
+- `go` starts a goroutine
 
     go backgroundTask()
     proceed()
 
-- `chan` identifies a channel, `<-` sends or read
+- `chan` identifies a channel, `<-` sends or read from a channel
 
     messages := make(chan(string), 0)
     messages <- "Hi there!"
@@ -208,19 +252,20 @@ but you can't call directly `file.checkValid()`, `file.read()` or `file.wrapErr(
 
 * Syntax: execution
 
+- `defer` delays execution as last before parent exits
+
+    func readFile() []byte{
+        file := os.Open("some/path")
+        defer file.Close()
+        b, _: ioutil.ReadAll(file)
+    }
+
 - `panic`, `recover`: execution interruption and recovery
 
     if err := checkSomething(); err != nil {
         panic(err)
     }
 
-- `defer` delays execution after parent has exited
-
-    func readFile(){
-        file := os.Open("some/path")
-        defer file.Close()
-        ...
-    }
 
 * Types and variables
 
@@ -315,11 +360,6 @@ Method signature
     func (receiver myType) myMethod(arg1 T1, arg2 T2) error {}
 
 Actually no big difference between the two: methods have a _receiver_ and is common to use a pointer to a type because most of methods need to modify the receiver itself.
-Convention is to return multiple values leaving `error` as last one (example from std library pkg [[https://github.com/golang/go/blob/master/src/net/http/client.go#L369][net/http/client.go]])
-
-    func Get(url string) (resp *Response, err error) {
-        return DefaultClient.Get(url)
-    }
 
 * Functions and methods: pass-by-value, pass-by-reference
 
@@ -347,13 +387,55 @@ In [[https://github.com/golang/go/blob/master/src/net/http/server.go#L2369][http
 
 .play ./cmd/functions_types/main.go
 
+* Error handling
+
+Every error must be handled explicitly, either to be returned to the caller or to act with it; no error propagation.
+`error` is a type and you can build you custom errors using the `errors` package or satisfying the `error` interface.
+
+    type error interface {
+        Error() string
+    }
+
+Convention when returning multiple values: leave `error` as last one (example from std library pkg [[https://github.com/golang/go/blob/master/src/net/http/client.go#L369][net/http/client.go]])
+
+    func Get(url string) (resp *Response, err error) {
+        return DefaultClient.Get(url)
+    }
+
+* Errors: best practice
+
+- avoid generalization of error checking to save lines of code
+
+    // Don't
+    func main(){
+        a, err := firstFunction()
+        checkError(err)
+        b, err := secondFunction()
+        checkError(err)
+    }
+
+    func checkError(err error){
+        log.Println(err)
+    }
+
+- handle the error immediately
+
+    // Good
+    conn, err := startConnection(client)
+    if err != nil {
+        return err
+    }
+    conn.Write([]byte("..."))
+
 * Collections
 
 Collections are types!
+    
+    var oneToTen []int
+    var htmlColors map[string]string
 
 - array: fixed size list
-
-    oneToTen := [10]int{1,2,3,4,5,6,7,8,9,10}
+    oneToTen = [10]int{1,2,3,4,5,6,7,8,9,10}
 
 - slice: variable size list (pointers to array)
 
@@ -371,20 +453,21 @@ Collections are types!
 
 * Collections: operators
 
-- `append([]T,` `T...)` adds up to the first argument slice all the items from second argument onward (all must have same type), returns a bigger slice
+- `append(s` `[]T,` `i` `T...)` adds up to the first argument slice all the items from second argument onward (all must have same type), returns a bigger slice
 
     numbers := make([]int, 0)
     numbers = append(numbers, []int{1,2,3,4,5,6,7,8,9,10}...)
 
-- `len()` returns an `int` with the size of elements contained
+- `copy(dest,` `source` `[]T)` copies all items in dest to source, returns `int` with number of copied items 
+
+- `len(s` `[]T)` returns an `int` with the size of elements contained in the slice or map
 
     oneToTen := [10]int{1,2,3,4,5,6,7,8,9,10}
     fmt.Println(len(oneToTen)) // prints 10
 
-- `cap()` returns an `int` with the size of the slots allocated
+- `cap(s` `[]T)` returns an `int` with the size of the slots allocated
 
-    numbers := make(int, 0)
-    numbers = append(numbers, []int{1,2,3,4,5,6,7,8,9,10}...)
+- `delete(m` `map[T]T2,` `k` `T)` remove an item from a map using the specified key, no-op if key is not found
 
 * Interfaces
 
@@ -447,7 +530,10 @@ and there are parsers out there that will produce xUnit report out of it
 
 * Tests: frameworks
 
-Wrappers around `testing` that makes it easy to write tests with complex conditions reducing the boilerplate code
+`testing` from std lib is the best framework! 
+You can run parallel tests and table-drive tests, very powerful.
+
+Still it lacks something so there are wrappers around it to reduce boilerplate code
 
 - [[https://github.com/stretchr/testify][stretchr/testify]] easy `assert` with matchers
 - [[https://onsi.github.io/ginkgo/][ginkgo]] + [[http://onsi.github.io/gomega/][gomega]] extensive BDD framework
@@ -459,7 +545,7 @@ You can write benchmark tests with the signature
 
     func BenchmarkSomething(b *testing.B) {
         for n := 0; n < b.N; n++ {
-                ...
+                something()
         }
     }
 
@@ -469,19 +555,25 @@ and see the results of the benchmark running
 
 * Concurrency
 
-Go does not have threads, it uses goroutines
+Go does not have threads, but it has goroutines
 
-    A goroutine is a lightweight thread managed by the Go runtime
+_A_ _goroutine_ _is_ _a_ _lightweight_ _thread_ _managed_ _by_ _the_ _Go_ _runtime_
 
 By far the most complex functinality of the language: its not very easy to use but can yield to amazing resource optimization.
 For example when network is a constraint you can create rate limiters or request pools, or you can control disk access for I/O intensive applications.
 
 Using gorotuines implies a change of mindset because you're not intended to parallelize the same task but rather split the task in sub-tasks and make them run in sync.
 
-Parallel    => run the same thing multiple times
-Concurrent  => run multiple things at the same time 
+Parallelized execution => run the same thing multiple times
+Concurrent execution => run multiple things at the same time 
 
-* So much to discover...
+_Concurrency_ _enables_ _parallelism_
+
+* Concurrency: example
+
+.play ./cmd/concurrency/main.go
+
+* So much more to discover...
 
 Go has a lot more to offer from the standard library
 
@@ -492,7 +584,7 @@ Go has a lot more to offer from the standard library
 - mutexes and channels (for concurrent applications)
 - databases via `sql` package
 - conditional build targets
-- improting and running C code via cgo
+- importing and running C code via cgo
 - code generation
 
 Just google `golang ...` for a stackoverflow page or blog post.
