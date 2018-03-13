@@ -577,17 +577,27 @@ _Concurrency_ _enables_ _parallelism_
 
 Go has a lot more to offer from the standard library
 
-- vendoring and dependency management 
+- vendoring and advanced dependency management 
 - exposing application metrics with `expvar` package
 - enriching http with `context`
-- use of closures
 - mutexes and channels (for concurrent applications)
 - databases via `sql` package
 - conditional build targets
 - importing and running C code via cgo
 - code generation
 
-Just google `golang ...` for a stackoverflow page or blog post.
+Just google "golang ..." for a stackoverflow page or blog post.
+
+* Further learning resources
+
+- https://talks.golang.org/
+- https://golang.org/doc/effective_go.html
+- https://golang.org/doc/articles/wiki/#tmp_0 
+- https://golangbot.com/learn-golang-series/ 
+- https://www.golang-book.com/books/intro/
+- https://gobyexample.com/
+- https://rakyll.org/
+- https://dave.cheney.net/ 
 
 * Questions?
 
@@ -603,18 +613,9 @@ Our real-world application will be an HTTP rewrite engine, configurable via JSON
 
 Exercise:
 
-- writing `main`
+- writing `main` application
 - improve performance: create benchmark tests (hint maps are generally faster than slices)
 - add a second behaviour with a different type of rule to be applied (e.g. URI to URI instead of URI to URL)
-
-
-
-
-
-
-
-
-
 
 
 
