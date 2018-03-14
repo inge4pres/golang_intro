@@ -82,11 +82,11 @@ All the tools to do code-completion, test debugging, code search and others are 
 : note the import section and the package main
 With go installed you can now `go` `get` the presentation repository 
 
-    go get git.bravofly.com/fgualazzi/golang_intro.git
+    go get github.com/inge4pres/golang_intro
 
 and it will be placed into 
 
-    $HOME/go/src/git.bravofly.com/fgualazzi/golang_intro.git
+    $HOME/go/src/github.com/inge4pres/golang_intro
 
 * Running Hello Go locally
 
@@ -608,7 +608,7 @@ Our real-world application will be an HTTP rewrite engine, configurable via JSON
 - it should be possible to pass the JSON configuration file as a command-line argument
 - it should redirect to a URL for a given URI, serve 404 if no URI matches configuration
 
-    go get git.bravofly.com/fgualazzi/rewrite-engine.git
+    go get github.com/inge4pres/rewrite-engine
 
 Exercise:
 
