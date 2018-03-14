@@ -211,7 +211,6 @@ also used to execute code without getting the return value
 - `if`, `else`, `switch`: conditionals (if-else is discouraged)
 
     if condition() {}
-
     if a, ok := values(); ok {}
 
     switch user := users(); user {
@@ -221,15 +220,16 @@ also used to execute code without getting the return value
             ...
     }
 
-- `for`, `range`: looping
+- `for`, `break`, `continue`, `range`: looping
 
     for a := 0; a < MAX; a++ {}
-
+    for a := check(); a; { a = check() }
     for index, item := range someSlice {}
-
     for key, val := range someMap {}
-
-    for {} // == while(true) in bash, loops forever
+    for { // == while(true) in bash, loops forever
+        continue
+        break
+    } 
 
 * Syntax: concurrency
 
@@ -265,7 +265,6 @@ also used to execute code without getting the return value
     if err := checkSomething(); err != nil {
         panic(err)
     }
-
 
 * Types and variables
 
@@ -402,7 +401,7 @@ Convention when returning multiple values: leave `error` as last one (example fr
         return DefaultClient.Get(url)
     }
 
-* Errors: best practice
+* Errors: best practices
 
 - avoid generalization of error checking to save lines of code
 
@@ -614,7 +613,7 @@ Our real-world application will be an HTTP rewrite engine, configurable via JSON
 Exercise:
 
 - writing `main` application
-- improve performance: create benchmark tests (hint maps are generally faster than slices)
+- improve performance, write benchmark tests (hint: maps are generally faster than slices)
 - add a second behaviour with a different type of rule to be applied (e.g. URI to URI instead of URI to URL)
 
 
